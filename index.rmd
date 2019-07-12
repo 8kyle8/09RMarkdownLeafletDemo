@@ -1,0 +1,39 @@
+---
+title: "Developing Data Products - Week 2 Assignment (R Markdown and Leaflet)"
+author: "Kyle Kaicheng Bao"
+date: "12 July 2019"
+output: html_document
+---
+
+## Earthquakes with Magnitude ≥6.0 from 1 Jan 2019 to 12 Jul 2019
+
+Data was sourced on 12 Jul 2019 from the [**European-Mediterranean Seismological Centre CSEM** website](https://www.emsc-csem.org/Earthquake/). The `csv` data file can be found in the same GitHub repository this webpage is hosted in.
+
+```{r, echo=FALSE, out.width="100%"}
+library(leaflet)
+
+df <- read.csv("export_EMSC.csv", header = TRUE, sep = ";")
+
+df$popup <- paste(df$Date, df$Time.UTC, "<br>",
+                  "Magnitude:", df$Magnitude, "<br>",
+                 df$Region.Name)
+
+df$label <- paste(df$Date, df$Time.UTC, "Magnitude:", df$Magnitude, df$Region.Name)
+
+df %>% 
+  leaflet() %>% 
+  addTiles(urlTemplate = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", 
+           attribution = "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community") %>% 
+  addMarkers(lng = df$Longitude, 
+             lat = df$Latitude, 
+             popup = df$popup,
+             label = df$label) %>% 
+  addCircles(lng = df$Longitude, 
+             lat = df$Latitude,
+             weight = 1,
+             radius = df$Magnitude^6.75, # change this value to scale the circles
+             color = "red",
+             fillColor = "orange",
+             fillOpacity = 0.3)
+```
+
